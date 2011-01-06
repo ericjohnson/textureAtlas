@@ -115,8 +115,8 @@
  	  }
  	  //check boundary conditions
  	  if (origin.x < 0 || origin.y < 0 ||
- 	      origin.x+image.size.width >= size.width ||
- 	      origin.y+image.size.height >= size.height)
+ 	      origin.x+image.size.width > size.width ||
+ 	      origin.y+image.size.height > size.height)
  	    break;
  	  //check overlap conditions
  	  NSRect potentialPlacement = NSMakeRect(origin.x, origin.y, image.size.width, image.size.height);
@@ -179,13 +179,18 @@
   
   //update atlasDictionary
   NSMutableDictionary * imagesDict = [atlasDictionary objectForKey:@"images"];
+//   CGContextScaleCTM(imageContext, 1.0, -1.0);
+//   CGContextTranslateCTM(imageContext, 0.0, -size.height);
+
   for (NSString * imageFile in placements) {
     NSMutableDictionary * imageInfo = [NSMutableDictionary dictionary];
     NSImage * image = [[[NSImage alloc] initWithContentsOfFile:imageFile] autorelease];
     CGImageRef cgimage = [image CGImageForProposedRect:NULL context:nil hints:nil];
     NSRect placement = [[placements objectForKey:imageFile] rectValue];
+    NSRect realPlacement = NSMakeRect(placement.origin.x, size.height-placement.origin.y-placement.size.height,
+				      placement.size.width, placement.size.height);
     CGContextDrawImage(imageContext,
- 		       placement,
+ 		       realPlacement,
  		       cgimage);
     [imageInfo setObject:textureAtlas forKey:@"atlas"];
     [imageInfo setObject:[NSNumber numberWithFloat:placement.origin.x] forKey:@"placement.origin.x"];
